@@ -1,11 +1,39 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Phone, Pill, Heart, Mic, Activity, Shield, ArrowLeft } from "lucide-react";
+import { Phone, Pill, Heart, Mic, Activity, Shield, ArrowLeft, Users } from "lucide-react";
 import { Button } from "../components/ui/button";
 import HealthCard from "../components/HealthCard";
 import ActivityFeed from "../components/ActivityFeed";
 import ThemeToggle from "../components/ThemeToggle";
+import AIVoiceAssistant from "../components/AIVoiceAssistant";
 
 const ElderlyDashboard = () => {
+  const [familyMembersCount, setFamilyMembersCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  // Ref to programmatically trigger the voice assistant
+  const voiceAssistantRef = useRef<{ startListening: () => void } | null>(null);
+
+  useEffect(() => {
+    checkFamilyMembers();
+  }, []);
+
+  const checkFamilyMembers = async () => {
+    try {
+      // Family member fetch logic here
+    } catch (error) {
+      console.error("Error checking family members:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVoiceAssistantClick = () => {
+    // Call the exposed startListening method from AIVoiceAssistant
+    if (voiceAssistantRef.current) {
+      voiceAssistantRef.current.startListening();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -60,22 +88,40 @@ const ElderlyDashboard = () => {
         <div>
           <h2 className="text-xl font-bold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-4">
+            {/* Voice Assistant button — calls ref method directly */}
+            <button
+              onClick={handleVoiceAssistantClick}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-6 px-4 rounded-lg flex flex-col items-center justify-center gap-3 transition-all hover:scale-105"
+            >
+              <Mic className="h-10 w-10" />
+              <span>Voice Assistant</span>
+            </button>
+
             <Link to="/medication">
               <Button variant="elderlySecondary" size="xl" className="w-full flex-col h-auto py-6 gap-3">
                 <Pill className="h-10 w-10" />
                 <span>Medications</span>
               </Button>
             </Link>
-            <Button variant="elderly" size="xl" className="w-full flex-col h-auto py-6 gap-3">
-              <Mic className="h-10 w-10" />
-              <span>Voice Assistant</span>
-            </Button>
+
+            <Link to="/family-members">
+              <Button variant="elderly" size="xl" className="w-full flex-col h-auto py-6 gap-3">
+                <Users className="h-10 w-10" />
+                <span>Family</span>
+              </Button>
+            </Link>
           </div>
         </div>
 
         {/* Activity Feed */}
         <ActivityFeed />
       </main>
+
+      {/*
+        AIVoiceAssistant is rendered here (fixed position floating button + panel).
+        The ref lets the dashboard's button trigger startListening() directly.
+      */}
+      <AIVoiceAssistant ref={voiceAssistantRef} />
     </div>
   );
 };
